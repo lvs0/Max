@@ -182,6 +182,7 @@ git push origin feature/my-tool
 MIT — do whatever you want with it.
 
 ---
+by Hope
 
 <div align="center">
 
