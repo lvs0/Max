@@ -346,10 +346,18 @@ function AgentPanel({ currentPlan, subAgents }) {
 
 // ── Right Panel: Tasks & Calendar ─────────────────────────────────────────
 
-function RightPanel({ tasks, onToggleTask }) {
+function RightPanel({ tasks, onToggleTask, onAddTask }) {
   const [activeTab, setActiveTab] = useState("tasks");
+  const [newTask, setNewTask] = useState("");
   const today = new Date();
   const hours = Array.from({ length: 12 }, (_, i) => i + 8);
+
+  const handleAddTask = () => {
+    if (newTask.trim()) {
+      onAddTask(newTask.trim());
+      setNewTask("");
+    }
+  };
 
   return (
     <div className="right-panel">
@@ -364,6 +372,17 @@ function RightPanel({ tasks, onToggleTask }) {
 
       {activeTab === "tasks" && (
         <div className="tasks-list">
+          <div className="add-task">
+            <input
+              type="text"
+              className="add-task-input"
+              placeholder="Add task..."
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
+            />
+            <button className="add-task-btn" onClick={handleAddTask}>+</button>
+          </div>
           {tasks.length === 0 ? (
             <p className="panel-empty">No tasks yet</p>
           ) : (
@@ -447,23 +466,17 @@ export default function App() {
   const [providers, setProviders] = useState([]);
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [terminalOutput, setTerminalOutput] = useState([]);
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Setup MAX agent", done: true, due: "Today" },
-    { id: 2, title: "Configure Ollama", done: false, due: "Today" },
-    { id: 3, title: "Test voice input", done: false, due: "Tomorrow" },
-  ]);
+  const [tasks, setTasks] = useState([]);
   const [currentPlan, setCurrentPlan] = useState([]);
-  const [subAgents, setSubAgents] = useState([
-    { id: 1, name: "Code Runner", emoji: "⚙️", status: "idle", active: false },
-    { id: 2, name: "File Manager", emoji: "📁", status: "idle", active: false },
-    { id: 3, name: "Research", emoji: "🔍", status: "idle", active: false },
-  ]);
+  const [subAgents, setSubAgents] = useState([]);
 
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
     fetchSessions();
+    fetchTasks();
+    fetchSubAgents();
     fetch(`${API}/health`)
       .then((r) => r.json())
       .then((d) => setProviders(d.providers || []))
@@ -497,6 +510,20 @@ export default function App() {
     } catch {}
   }
 
+  async function fetchTasks() {
+    try {
+      const r = await fetch(`${API}/tasks`);
+      setTasks(await r.json());
+    } catch {}
+  }
+
+  async function fetchSubAgents() {
+    try {
+      const r = await fetch(`${API}/agents`);
+      setSubAgents(await r.json());
+    } catch {}
+  }
+
   function newSession() {
     setCurrentSession(uid());
     setMessages([]);
@@ -510,8 +537,28 @@ export default function App() {
     fetchSessions();
   }
 
-  function toggleTask(id) {
-    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, done: !t.done } : t));
+  async function toggleTask(id) {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+    try {
+      await fetch(`${API}/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ done: !task.done }),
+      });
+      fetchTasks();
+    } catch {}
+  }
+
+  async function addTask(title) {
+    try {
+      await fetch(`${API}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, session_id: currentSession }),
+      });
+      fetchTasks();
+    } catch {}
   }
 
   function addTerminalLine(line) {
@@ -687,7 +734,7 @@ export default function App() {
           </div>
         </main>
 
-        <RightPanel tasks={tasks} onToggleTask={toggleTask} />
+        <RightPanel tasks={tasks} onToggleTask={toggleTask} onAddTask={addTask} />
       </div>
     </>
   );

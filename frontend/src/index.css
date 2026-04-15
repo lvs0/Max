@@ -893,6 +893,53 @@ html, body, #root {
   font-family: 'DM Mono', monospace;
 }
 
+.add-task {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.add-task-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.add-task-input:focus {
+  border-color: var(--teal);
+}
+
+.add-task-input::placeholder {
+  color: var(--text-muted);
+}
+
+.add-task-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--teal-dim);
+  border: 1px solid var(--teal);
+  color: var(--teal);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.add-task-btn:hover {
+  background: var(--teal);
+  color: var(--bg);
+}
+
 /* ── Right Panel ─────────────────────────────────────────────────────────── */
 
 .right-panel {

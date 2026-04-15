@@ -64,6 +64,34 @@ def init_db():
             last_active TEXT
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            done INTEGER DEFAULT 0,
+            due TEXT,
+            session_id TEXT,
+            created_at TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS sub_agents (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            emoji TEXT,
+            status TEXT DEFAULT 'idle',
+            active INTEGER DEFAULT 0
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS calendar (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            date TEXT,
+            time TEXT,
+            session_id TEXT
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -412,3 +440,163 @@ async def health():
 @app.get("/")
 async def root():
     return {"name": "MAX", "version": "1.0.0", "status": "running"}
+
+# ─── Tasks API ────────────────────────────────────────────────────────────────
+
+class TaskCreate(BaseModel):
+    title: str
+    due: Optional[str] = None
+    session_id: Optional[str] = None
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    done: Optional[bool] = None
+    due: Optional[str] = None
+
+@app.get("/tasks")
+async def list_tasks(session_id: Optional[str] = None):
+    conn = sqlite3.connect(DB_PATH)
+    if session_id:
+        rows = conn.execute("SELECT id, title, done, due, session_id FROM tasks WHERE session_id=?", (session_id,)).fetchall()
+    else:
+        rows = conn.execute("SELECT id, title, done, due, session_id FROM tasks").fetchall()
+    conn.close()
+    return [{"id": r[0], "title": r[1], "done": bool(r[2]), "due": r[3], "session_id": r[4]} for r in rows]
+
+@app.post("/tasks")
+async def create_task(task: TaskCreate):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.execute(
+        "INSERT INTO tasks (title, due, session_id, created_at) VALUES (?,?,?,?)",
+        (task.title, task.due, task.session_id, datetime.utcnow().isoformat())
+    )
+    conn.commit()
+    task_id = cursor.lastrowid
+    conn.close()
+    return {"id": task_id, "title": task.title, "done": False, "due": task.due}
+
+@app.patch("/tasks/{task_id}")
+async def update_task(task_id: int, update: TaskUpdate):
+    conn = sqlite3.connect(DB_PATH)
+    if update.title is not None:
+        conn.execute("UPDATE tasks SET title=? WHERE id=?", (update.title, task_id))
+    if update.done is not None:
+        conn.execute("UPDATE tasks SET done=? WHERE id=?", (int(update.done), task_id))
+    if update.due is not None:
+        conn.execute("UPDATE tasks SET due=? WHERE id=?", (update.due, task_id))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+@app.delete("/tasks/{task_id}")
+async def delete_task(task_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("DELETE FROM tasks WHERE id=?", (task_id,))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+# ─── Sub-Agents API ───────────────────────────────────────────────────────────
+
+@app.get("/agents")
+async def list_agents():
+    conn = sqlite3.connect(DB_PATH)
+    rows = conn.execute("SELECT id, name, emoji, status, active FROM sub_agents").fetchall()
+    if not rows:
+        default_agents = [
+            ("code-runner", "Code Runner", "⚙️", "idle", 0),
+            ("file-manager", "File Manager", "📁", "idle", 0),
+            ("research", "Research", "🔍", "idle", 0),
+            ("web-search", "Web Search", "🌐", "idle", 0),
+        ]
+        for agent in default_agents:
+            conn.execute("INSERT OR IGNORE INTO sub_agents (id, name, emoji, status, active) VALUES (?,?,?,?,?)", agent)
+        conn.commit()
+        rows = conn.execute("SELECT id, name, emoji, status, active FROM sub_agents").fetchall()
+    conn.close()
+    return [{"id": r[0], "name": r[1], "emoji": r[2], "status": r[3], "active": bool(r[4])} for r in rows]
+
+@app.patch("/agents/{agent_id}")
+async def update_agent(agent_id: str, update: dict):
+    conn = sqlite3.connect(DB_PATH)
+    if "status" in update:
+        conn.execute("UPDATE sub_agents SET status=? WHERE id=?", (update["status"], agent_id))
+    if "active" in update:
+        conn.execute("UPDATE sub_agents SET active=? WHERE id=?", (int(update["active"]), agent_id))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+# ─── Calendar API ─────────────────────────────────────────────────────────────
+
+class CalendarEvent(BaseModel):
+    title: str
+    date: str
+    time: Optional[str] = None
+    session_id: Optional[str] = None
+
+@app.get("/calendar")
+async def list_events(date: Optional[str] = None):
+    conn = sqlite3.connect(DB_PATH)
+    if date:
+        rows = conn.execute("SELECT id, title, date, time FROM calendar WHERE date=?", (date,)).fetchall()
+    else:
+        rows = conn.execute("SELECT id, title, date, time FROM calendar").fetchall()
+    conn.close()
+    return [{"id": r[0], "title": r[1], "date": r[2], "time": r[3]} for r in rows]
+
+@app.post("/calendar")
+async def create_event(event: CalendarEvent):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.execute(
+        "INSERT INTO calendar (title, date, time, session_id) VALUES (?,?,?,?)",
+        (event.title, event.date, event.time, event.session_id)
+    )
+    conn.commit()
+    event_id = cursor.lastrowid
+    conn.close()
+    return {"id": event_id, "title": event.title, "date": event.date, "time": event.time}
+
+@app.delete("/calendar/{event_id}")
+async def delete_event(event_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("DELETE FROM calendar WHERE id=?", (event_id,))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+# ─── File Browser API ─────────────────────────────────────────────────────────
+
+@app.get("/browse")
+async def browse_files(path: str = "."):
+    try:
+        entries = []
+        full_path = os.path.abspath(path)
+        parent = os.path.dirname(full_path)
+        
+        if os.path.isdir(full_path):
+            for item in sorted(os.listdir(full_path)):
+                item_path = os.path.join(full_path, item)
+                try:
+                    stat = os.stat(item_path)
+                    entries.append({
+                        "name": item,
+                        "path": item_path,
+                        "type": "dir" if os.path.isdir(item_path) else "file",
+                        "size": stat.st_size if os.path.isfile(item_path) else 0,
+                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                    })
+                except:
+                    pass
+        return {"path": full_path, "parent": parent, "entries": entries}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/read")
+async def read_file_api(path: str):
+    try:
+        with open(path, "r") as f:
+            content = f.read()
+        return {"content": content[:50000]}
+    except Exception as e:
+        return {"error": str(e)}

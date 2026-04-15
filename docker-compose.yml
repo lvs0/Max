@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # MAX Backend (FastAPI)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - MAX_MODEL=llama3
+      - MAX_DB=/app/max_memory.db
+    volumes:
+      - ./backend:/app/backend
+      - max-data:/app
+    networks:
+      - max-net
+    restart: unless-stopped
+
+  # MAX Frontend (React/Vite)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - max-net
+    restart: unless-stopped
+
+  # Ollama (Local LLM)
+  # Uncomment to run Ollama in Docker (requires GPU passthrough)
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-data:/root/.ollama
+  #   networks:
+  #     - max-net
+  #   restart: unless-stopped
+  #   # GPU support (uncomment for NVIDIA)
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+
+networks:
+  max-net:
+    driver: bridge
+
+volumes:
+  max-data:
+  ollama-data:
