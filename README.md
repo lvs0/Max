@@ -94,9 +94,19 @@ Open **http://localhost:3000** — you're now running MAX. 🚀
 
 ## 🎨 Demo
 
+**Try it now:** [Live Demo](https://lvs0.github.io/Max/demo.html)
+
 <p align="center">
-  <img src="https://i.imgur.com/demo-placeholder.gif" alt="MAX Demo" width="800">
+  <a href="https://lvs0.github.io/Max/demo.html">
+    <img src="https://raw.githubusercontent.com/lvs0/Max/main/demo-preview.png" alt="MAX Demo" width="800" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+  </a>
 </p>
+
+<noscript>
+<p align="center">
+  <img src="https://via.placeholder.com/800x450/060811/2de2d6?text=MAX+Demo" alt="MAX Demo Preview" width="800">
+</p>
+</noscript>
 
 ```
 You: "analyze my project and create a summary"
