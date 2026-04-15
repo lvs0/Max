@@ -2,192 +2,250 @@
 
 <br/>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%">
+</p>
+
 ```
-███╗   ███╗ █████╗ ██╗  ██╗
-████╗ ████║██╔══██╗╚██╗██╔╝
-██╔████╔██║███████║ ╚███╔╝
-██║╚██╔╝██║██╔══██║ ██╔██╗
-██║ ╚═╝ ██║██║  ██║██╔╝ ██╗
-╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+    ███╗   ███╗ █████╗ ██╗  ██╗
+    ████╗ ████║██╔══██╗╚██╗██╔╝
+    ██╔████╔██║███████║ ╚███╔╝
+    ██║╚██╔╝██║██╔══██║ ██╔██╗
+    ██║ ╚═╝ ██║██║  ██║██╔╝ ██╗
+    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 ```
 
-**Multi-Agent eXecutor**
+# **MAX** — Multi-Agent eXecutor
 
-*Run AI. Own it. No cloud. No cost.*
+### *Run AI. Own it. No cloud. No cost.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-green.svg)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://react.dev)
-[![Stars](https://img.shields.io/github/stars/YOUR_USERNAME/max?style=social)](https://github.com/YOUR_USERNAME/max)
+<p align="center">
+  <a href="https://github.com/lvs0/max/stargazers"><img src="https://img.shields.io/github/stars/lvs0/max?style=social" alt="Stars"></a>
+  <a href="https://github.com/lvs0/max/network/members"><img src="https://img.shields.io/github/forks/lvs0/max?style=social" alt="Forks"></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-0.115-green.svg" alt="FastAPI">
+  <img src="https://img.shields.io/badge/React-18-61dafb.svg" alt="React">
+  <a href="https://github.com/lvs0/max/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-teal.svg" alt="License"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/OS-Linux-cyan?style=flat-square&logo=linux" alt="Linux">
+  <img src="https://img.shields.io/badge/CPU-Only-orange?style=flat-square" alt="CPU Only">
+  <img src="https://img.shields.io/badge/GPU-Not Required-red?style=flat-square" alt="No GPU">
+  <img src="https://img.shields.io/badge/Privacy-100%25-blueviolet?style=flat-square" alt="Privacy">
+</p>
+
+<p align="center">
+  <b>⭐ 100% local AI agent. Your data never leaves your machine.</b>
+</p>
 
 </div>
 
 ---
 
-## What is MAX?
+## 💡 What is MAX?
 
-MAX is a **fully local, autonomous AI agent** that runs on your machine with zero cloud dependency.
+MAX is a **fully autonomous AI agent** that runs entirely on YOUR hardware. No cloud. No subscriptions. No data harvesting.
 
-- 🧠 **Autonomous agent loop** — MAX thinks, uses tools, and iterates until the task is done
-- 💻 **Runs anywhere** — works on CPU-only machines, no GPU required
-- 🔒 **Fully private** — your data never leaves your computer
-- 🆓 **Zero cost** — Ollama for offline use, Groq free tier as optional turbo mode
-- ✨ **Beautiful UI** — glassmorphic dark interface with real-time tool visualization
-
----
-
-## Demo
-
-> *MAX writing and executing a Python script, reading files, and remembering context — all locally.*
-
-```
-User: analyze my project folder and write a summary to summary.txt
-
-MAX: 🧠 Thinking...
-     ⚙️ shell_command → ls -la /home/user/project
-     ↳ main.py  utils.py  README.md  data/...
-     📖 read_file → /home/user/project/main.py
-     ↳ [file contents]
-     ✏️ write_file → summary.txt
-     ↳ ✅ Written to summary.txt
-
-Done! I analyzed your project and created summary.txt with:
-- 3 Python files (main.py, utils.py, tests.py)
-- A data pipeline with SQLite storage
-- Full documentation in README.md
-```
+- 🧠 **Autonomous agent loop** — MAX thinks, uses tools, and iterates until the task is complete
+- 💻 **Runs on CPU** — no GPU required, designed for real hardware
+- 🔒 **100% private** — your data stays on your machine, always
+- 🆓 **Zero cost** — uses Ollama (free) or Groq's free tier
+- ✨ **Beautiful UI** — glassmorphic dark interface with real-time visualization
+- 🤖 **Sub-agents** — specialized AI workers for different tasks
+- 🖥️ **Live terminal** — watch MAX execute commands in real-time
 
 ---
 
-## Quick Start
+## ⚡ Quick Start
 
-### 1. Clone
+### Prerequisites
+
+- Python 3.11+
+- Node.js 18+
+- [Ollama](https://ollama.ai) (optional but recommended)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/max
+# 1. Clone
+git clone https://github.com/lvs0/max
 cd max
-```
 
-### 2. Backend
-
-```bash
+# 2. Setup Backend
 cd backend
 pip install -r requirements.txt
-export GROQ_API_KEY="your_key_here"   # optional, but faster
-uvicorn main:app --reload
-```
 
-> No Groq key? Install [Ollama](https://ollama.ai) and run `ollama pull llama3`. MAX auto-detects it.
+# 3. Start Ollama (optional but recommended)
+ollama pull llama3
+# OR get a free key at https://console.groq.com
+export GROQ_API_KEY="your_key_here"
 
-### 3. Frontend
+# 4. Run Backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-```bash
-cd frontend
+# 5. In another terminal, run Frontend
+cd ../frontend
 npm install
 npm run dev
 ```
 
-Open **http://localhost:3000** and you're running MAX. ✅
+Open **http://localhost:3000** — you're now running MAX. 🚀
 
 ---
 
-## Architecture
+## 🎨 Demo
+
+<p align="center">
+  <img src="https://i.imgur.com/demo-placeholder.gif" alt="MAX Demo" width="800">
+</p>
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                     MAX AGENT LOOP                   │
-│                                                      │
-│  User Input → [THINK] → [ACT] → [OBSERVE] → repeat  │
-│                  ↓          ↓                        │
-│              LLM Call    Tools:                      │
-│           (Groq/Ollama)  • execute_code              │
-│                          • read_file / write_file    │
-│                          • shell_command             │
-│                          • remember / recall         │
-└─────────────────────────────────────────────────────┘
+You: "analyze my project and create a summary"
 
-Backend  →  FastAPI + SQLite memory
-Frontend →  React + Vite (glassmorphic UI)
-Inference → Groq (cloud, free) → Ollama (local) fallback
+MAX: 🧠 Thinking...
+    ⚙️ shell_command → ls -la ./project
+    ↳ main.py, utils.py, tests/, README.md
+    📖 read_file → ./project/main.py
+    ✏️ write_file → summary.txt
+    
+✅ Done! Created summary.txt with:
+   - 3 Python files
+   - Test coverage: 78%
+   - Full documentation
 ```
 
 ---
 
-## Tools
+## 🏗️ Architecture
 
-| Tool | Description |
+```
+┌─────────────────────────────────────────────────────────┐
+│                    MAX INTERFACE                        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
+│  │  Agent   │  │ Terminal │  │  Tasks   │              │
+│  │  Plan    │  │  Popup   │  │  Panel   │              │
+│  └──────────┘  └──────────┘  └──────────┘              │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │              AI Chat + Orb Visualization         │   │
+│  └─────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────┐
+│                     MAX AGENT LOOP                       │
+│                                                          │
+│   Input → [ THINK ] → [ PLAN ] → [ ACT ] → repeat       │
+│              ↓          ↓         ↓                     │
+│          Ollama/     Steps    Tools:                    │
+│           Groq      (Plan)    • execute_code            │
+│                      ↓       • read/write files         │
+│                   Sub-agents • shell commands            │
+│                             • remember/recall           │
+└─────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────┐
+│               Backend: FastAPI + SQLite                  │
+│               Inference: Ollama ↔ Groq                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🛠️ Tools
+
+| Tool | What it does |
 |------|-------------|
 | `execute_code` | Run Python in a sandboxed subprocess |
-| `read_file` | Read any local file |
-| `write_file` | Write content to disk |
-| `shell_command` | Safe shell execution (ls, git, pip...) |
-| `remember` | Persist key-value to SQLite memory |
+| `read_file` | Read any file on your system |
+| `write_file` | Write/create files |
+| `shell_command` | Execute shell commands safely |
+| `remember` | Store info in persistent memory |
 | `recall` | Retrieve from long-term memory |
 
 ---
 
-## Configuration
+## ⚙️ Configuration
+
+Create a `.env` file in `backend/`:
 
 ```bash
-# .env
-GROQ_API_KEY=gsk_...          # Optional (free at console.groq.com)
-OLLAMA_BASE_URL=http://localhost:11434   # Ollama endpoint
-MAX_MODEL=llama3-8b-8192      # Groq model
-MAX_DB=max_memory.db          # SQLite path
+# Required for Groq (free tier at console.groq.com)
+GROQ_API_KEY=gsk_...
+
+# Ollama settings (if using Ollama)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3
+
+# MAX settings
+MAX_MODEL=llama3-8b-8192    # Groq model
+MAX_DB=max_memory.db         # SQLite database path
 ```
 
 ---
 
-## Hardware
+## 📦 Hardware Requirements
 
-MAX was designed to run on **real-world hardware**, including:
+MAX is built for **real hardware**:
 
-- ✅ Laptops without GPU
-- ✅ 8GB RAM machines
-- ✅ Intel i5/i7 from 2014+
-- ✅ Ubuntu, macOS, Windows (WSL)
+| Component | Minimum | Recommended |
+|-----------|---------|-------------|
+| RAM | 4GB | 8GB+ |
+| CPU | Any x86_64 | i5/i7 or equivalent |
+| Storage | 2GB | 10GB+ |
+| GPU | ❌ Not needed | ❌ Not needed |
 
-Tested on a **Lenovo ThinkPad X250 (i5-5300U, 8GB RAM, CPU-only)**.
+Tested on: **Lenovo ThinkPad X250** (i5-5300U, 8GB RAM, no GPU) ✅
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
 
-- [ ] Web search tool (DuckDuckGo + Brave)
-- [ ] Telegram bot interface
-- [ ] Voice input (Whisper local)
-- [ ] Multi-agent mode (specialized sub-agents)
+- [ ] Voice input with Whisper
+- [ ] Web search integration
+- [ ] Multi-agent orchestration
 - [ ] Plugin system
-- [ ] Docker compose deploy
 - [ ] Electron desktop app
+- [ ] Mobile companion app
+- [ ] Docker deployment
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-PRs are welcome. Keep it local-first and dependency-light.
+Contributions welcome! Open an issue or PR.
 
 ```bash
-git checkout -b feature/my-tool
-# add your tool in backend/main.py under TOOLS_SCHEMA + dispatch_tool()
-git commit -m "feat: add my-tool"
-git push origin feature/my-tool
+git clone https://github.com/lvs0/max
+cd max
+git checkout -b feature/my-feature
+# make your changes
+git push origin feature/my-feature
 ```
 
 ---
 
-## License
+## 📜 License
 
 MIT — do whatever you want with it.
 
 ---
-by Hope
+
+## 🙏 Credits
+
+Built with 💜 by [lvs0](https://github.com/lvs0)
+
+- Email: lvs0@proton.me
+- Instagram: @lvs393
+- Discord: lvs0810_81613
+
+---
 
 <div align="center">
 
-Built by a solo developer on a ThinkPad with no GPU.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png" width="100%">
+</p>
 
-*If this helped you, star it.* ⭐
+**If this helped you, leave a ⭐**
+
+*Built by a solo developer on real hardware.*
 
 </div>
