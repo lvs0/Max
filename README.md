@@ -59,33 +59,34 @@ MAX is a **fully autonomous AI agent** that runs entirely on YOUR hardware. No c
 
 ## ⚡ Quick Start
 
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- [Ollama](https://ollama.ai) (optional but recommended)
+### One-Command Install + Run
 
 ```bash
-# 1. Clone
-git clone https://github.com/lvs0/max
-cd max
+git clone https://github.com/lvs0/max && cd max && ./install.sh
+```
 
-# 2. Setup Backend
-cd backend
-pip install -r requirements.txt
+### Or Manual Setup
 
-# 3. Start Ollama (optional but recommended)
-ollama pull llama3
-# OR get a free key at https://console.groq.com
-export GROQ_API_KEY="your_key_here"
+```bash
+# 1. Clone & enter
+git clone https://github.com/lvs0/max && cd max
 
-# 4. Run Backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# 2. One-command start (auto-installs everything)
+./start.sh
+```
 
-# 5. In another terminal, run Frontend
-cd ../frontend
-npm install
-npm run dev
+### Or Step-by-Step
+
+```bash
+# Prerequisites
+pip install -r backend/requirements.txt
+npm install   # in frontend/
+
+# Pull LLM model
+ollama pull llama3   # or get Groq key at console.groq.com
+
+# Start
+./start.sh
 ```
 
 Open **http://localhost:3000** — you're now running MAX. 🚀
