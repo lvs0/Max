@@ -209,13 +209,30 @@ Tested on: **Lenovo ThinkPad X250** (i5-5300U, 8GB RAM, no GPU) ✅
 
 ## 🗺️ Roadmap
 
-- [ ] Voice input with Whisper
+- [x] Voice input with Web Speech API
+- [x] Tasks & Calendar integration
+- [x] Docker deployment
 - [ ] Web search integration
 - [ ] Multi-agent orchestration
 - [ ] Plugin system
 - [ ] Electron desktop app
 - [ ] Mobile companion app
-- [ ] Docker deployment
+- [ ] Polygone network integration (distributed inference)
+
+---
+
+## 🔗 Related Projects
+
+MAX is part of the **SOE (Self-Own Everything)** ecosystem:
+
+| Project | Description | Link |
+|---------|-------------|------|
+| **Polygone** | Ephemeral post-quantum privacy network | [GitHub](https://github.com/lvs0/Polygone) |
+| **Polygone-Petals** | Distributed AI/ML inference network | [GitHub](https://github.com/lvs0/Polygone-Petals) |
+| **Polygone-Brain** | AI reasoning engine | [GitHub](https://github.com/lvs0/Polygone-Brain) |
+| **Loop** | Binary format for LLM fine-tuning | [GitHub](https://github.com/lvs0/Loop) |
+
+**Vision:** MAX agents running on the Polygone network for fully private, decentralized AI.
 
 ---
 
