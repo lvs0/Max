@@ -1,6 +1,20 @@
 {
   "name": "max-agent",
   "version": "1.0.0",
+  "description": "MAX - Multi-Agent eXecutor. Run AI locally, own your data.",
+  "keywords": [
+    "ai-agent",
+    "local-ai",
+    "autonomous-agent",
+    "llm",
+    "ollama",
+    "groq",
+    "fastapi",
+    "react",
+    "privacy",
+    "self-hosted",
+    "cpu-friendly"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
