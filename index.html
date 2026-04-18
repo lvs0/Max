@@ -1,446 +1,592 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Max — Jarvis Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            void: '#0a0a0f',
-            orbIdle: '#00F5F5',
-            orbSpeak: '#FFD700',
-            silver: '#a0a0b0',
-            softWhite: '#e0e0e8',
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            orbitron: ['Orbitron', 'monospace'],
-          },
-        },
-      },
-    }
-  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Max — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0a0f; font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
-    #root { width: 100vw; height: 100vh; }
+    :root {
+      --bg: #050510;
+      --glass: rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.1);
+      --glass-hover: rgba(255,255,255,0.1);
+      --orb-blue: #3b82f6;
+      --orb-yellow: #facc15;
+      --accent: #38bdf8;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+    }
 
-    @keyframes orbPulse {
-      0%, 100% { transform: scale(0.95); box-shadow: 0 0 40px #00F5F5, 0 0 80px rgba(0,245,245,0.3); }
-      50% { transform: scale(1.05); box-shadow: 0 0 60px #00F5F5, 0 0 120px rgba(0,245,245,0.5); }
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
     }
-    @keyframes orbSpeak {
-      0%, 100% { transform: scale(1.0); box-shadow: 0 0 50px #FFD700, 0 0 100px rgba(255,215,0,0.4); }
-      50% { transform: scale(1.15); box-shadow: 0 0 80px #FFD700, 0 0 160px rgba(255,215,0,0.6); }
+
+    /* ── Noise + Grid ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1;
     }
-    @keyframes panelIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: 
+        linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: 1;
     }
-    @keyframes statFill {
-      from { width: 0%; }
+
+    /* ── Particles Canvas ── */
+    #particles {
+      position: fixed; inset: 0;
+      z-index: 0; pointer-events: none;
     }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+
+    /* ── Layout ── */
+    .app {
+      display: flex;
+      height: 100vh;
+      position: relative; z-index: 2;
     }
-    .orb-idle { animation: orbPulse 2s ease-in-out infinite; }
-    .orb-speak { animation: orbSpeak 1.2s ease-in-out infinite; }
-    .panel-in { animation: panelIn 0.6s ease-out forwards; }
-    .glass {
-      background: rgba(255, 255, 255, 0.05);
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 280px;
+      background: var(--glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      gap: 24px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px;
+    }
+    .sidebar-logo .orb-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orb-blue), var(--orb-yellow));
+      box-shadow: 0 0 20px rgba(59,130,246,0.5);
+      animation: orbPulse 3s ease-in-out infinite;
+    }
+    .sidebar-logo span {
+      font-size: 1.4rem; font-weight: 800;
+      letter-spacing: 0.1em;
+      background: linear-gradient(90deg, var(--orb-blue), var(--orb-yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-section h3 {
+      font-size: 0.65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      padding: 0 8px;
+    }
+
+    /* Task Items */
+    .task-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+      overflow: hidden;
+    }
+    .task-item::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--orb-blue), var(--orb-yellow));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .task-item:hover {
+      background: var(--glass-hover);
+      transform: translateX(4px);
+    }
+    .task-item:hover::before { opacity: 1; }
+    .task-item.done { opacity: 0.4; }
+    .task-item.done .task-title { text-decoration: line-through; }
+    .task-title {
+      font-size: 0.85rem; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .task-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; color: var(--text-muted);
+    }
+    .task-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 0.6rem; font-weight: 700;
+      margin-top: 6px;
+      background: rgba(59,130,246,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+    .task-tag.urgent { background: rgba(250,204,21,0.15); color: var(--orb-yellow); border-color: rgba(250,204,21,0.2); }
+    .task-tag.project { background: rgba(168,85,247,0.15); color: #a855f7; border-color: rgba(168,85,247,0.2); }
+
+    /* Planning Timeline */
+    .plan-item {
+      display: flex; gap: 12px;
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .plan-item:hover { background: var(--glass); }
+    .plan-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-top: 4px;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .plan-dot.blue { background: var(--orb-blue); color: var(--orb-blue); }
+    .plan-dot.yellow { background: var(--orb-yellow); color: var(--orb-yellow); }
+    .plan-dot.green { background: #22c55e; color: #22c55e; }
+    .plan-content .plan-time {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem; color: var(--text-muted);
+    }
+    .plan-content .plan-title {
+      font-size: 0.8rem; font-weight: 700;
+    }
+
+    /* ── Main Area ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 40px;
+    }
+
+    /* Central Orb */
+    .orb-container {
+      position: relative;
+      width: 320px; height: 320px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .orb {
+      width: 240px; height: 240px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--orb-blue), var(--orb-yellow), var(--orb-blue));
+      animation: orbRotate 8s linear infinite, orbBreath 4s ease-in-out infinite;
+      filter: blur(1px);
+      position: relative;
+    }
+
+    .orb::before {
+      content: '';
+      position: absolute; inset: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2), transparent 60%);
+      background: conic-gradient(from 180deg, rgba(255,255,255,0.15), transparent 50%, rgba(255,255,255,0.08));
+    }
+
+    .orb::after {
+      content: '';
+      position: absolute; inset: -40px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, rgba(250,204,21,0.15) 40%, transparent 70%);
+      animation: orbGlow 4s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    .orb-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.06);
+      animation: ringPulse 3s ease-in-out infinite;
+    }
+    .orb-ring:nth-child(2) { inset: 30px; animation-delay: 0.5s; }
+    .orb-ring:nth-child(3) { inset: 60px; animation-delay: 1s; }
+    .orb-ring:nth-child(4) { inset: 90px; animation-delay: 1.5s; }
+
+    .orb-label {
+      position: absolute;
+      bottom: -20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem; color: var(--text-muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* Status Cards */
+    .status-row {
+      display: flex; gap: 20px;
+      margin-top: 48px;
+    }
+    .status-card {
+      background: var(--glass);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 140px;
+      transition: all 0.3s;
     }
-    .glass:hover { border-color: rgba(255, 255, 255, 0.15); }
-    .scroll-glass::-webkit-scrollbar { width: 4px; }
-    .scroll-glass::-webkit-scrollbar-track { background: transparent; }
-    .scroll-glass::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .status-card:hover {
+      background: var(--glass-hover);
+      transform: translateY(-4px);
+    }
+    .status-card .num {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(90deg, var(--orb-blue), var(--orb-yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .status-card .label {
+      font-size: 0.65rem; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Chat Bar ── */
+    .chat-bar {
+      position: fixed; bottom: 32px; left: 300px; right: 32px;
+      background: var(--glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(59,130,246,0.1);
+      transition: all 0.3s;
+    }
+    .chat-bar:focus-within {
+      border-color: rgba(59,130,246,0.4);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 60px rgba(59,130,246,0.2);
+    }
+    .chat-bar .orb-icon-sm {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orb-blue), var(--orb-yellow));
+      animation: orbPulse 3s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1;
+      background: transparent;
+      border: none; outline: none;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      caret-color: var(--accent);
+    }
+    .chat-input::placeholder { color: var(--text-muted); }
+    .chat-send {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orb-blue), var(--orb-yellow));
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+    .chat-send:hover { transform: scale(1.1); }
+    .chat-send svg { width: 16px; height: 16px; fill: white; }
+
+    /* ── Animations ── */
+    @keyframes orbRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes orbBreath {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    @keyframes orbGlow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+    @keyframes orbPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+
+    /* Entrance Animations */
+    .sidebar { animation: slideInLeft 0.8s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .main { animation: fadeInUp 1s cubic-bezier(0.4,0,0.2,1) 0.3s forwards; opacity: 0; }
+    .chat-bar { animation: slideInUp 0.8s cubic-bezier(0.4,0,0.2,1) 0.6s forwards; opacity: 0; }
+    .status-card { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .status-card:nth-child(1) { animation-delay: 0.8s; }
+    .status-card:nth-child(2) { animation-delay: 0.95s; }
+    .status-card:nth-child(3) { animation-delay: 1.1s; }
+    .status-card:nth-child(4) { animation-delay: 1.25s; }
+
+    @keyframes slideInLeft {
+      from { transform: translateX(-40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+
+    /* Clock */
+    .top-clock {
+      position: fixed; top: 24px; right: 32px;
+      text-align: right; z-index: 10;
+    }
+    .top-clock .time {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem; font-weight: 700;
+      background: linear-gradient(90deg, var(--orb-blue), var(--orb-yellow));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: fadeInUp 1s ease 0.5s forwards; opacity: 0;
+    }
+    .top-clock .date {
+      font-size: 0.7rem; color: var(--text-muted);
+      letter-spacing: 0.1em;
+      animation: fadeInUp 1s ease 0.7s forwards; opacity: 0;
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+<canvas id="particles"></canvas>
 
-    // ─── Particle Canvas ───────────────────────────────────────────────────────
-    function ParticleCanvas() {
-      const canvasRef = useRef(null);
+<!-- Clock -->
+<div class="top-clock">
+  <div class="time" id="clock">--:--</div>
+  <div class="date" id="date-str">--/--/----</div>
+</div>
 
-      useEffect(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="orb-icon"></div>
+      <span>MAX</span>
+    </div>
 
-        const particles = Array.from({ length: 40 }, () => ({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          r: Math.random() * 4 + 2,
-          dx: (Math.random() - 0.5) * 0.4,
-          dy: (Math.random() - 0.5) * 0.4,
-          opacity: Math.random() * 0.4 + 0.2,
-          color: Math.random() > 0.7 ? '#00F5F5' : '#ffffff',
-        }));
+    <div class="sidebar-section">
+      <h3>Tasks</h3>
+      <div class="task-item" onclick="toggleTask(this)">
+        <div class="task-title">Finalize Q2 strategy deck</div>
+        <div class="task-meta">Due Today · 18:00</div>
+        <div class="task-tag urgent">Urgent</div>
+      </div>
+      <div class="task-item" onclick="toggleTask(this)">
+        <div class="task-title">Review AI model outputs</div>
+        <div class="task-meta">Due Tomorrow · 10:00</div>
+        <div class="task-tag">Important</div>
+      </div>
+      <div class="task-item done" onclick="toggleTask(this)">
+        <div class="task-title">Deploy Max v1.2</div>
+        <div class="task-meta">Completed · Apr 17</div>
+        <div class="task-tag project">Project</div>
+      </div>
+      <div class="task-item" onclick="toggleTask(this)">
+        <div class="task-title">Write weekly standup notes</div>
+        <div class="task-meta">Due Monday · 09:00</div>
+        <div class="task-tag">Routine</div>
+      </div>
+      <div class="task-item" onclick="toggleTask(this)">
+        <div class="task-title">Infrastructure audit</div>
+        <div class="task-meta">Due Wed · 14:00</div>
+        <div class="task-tag project">Project</div>
+      </div>
+    </div>
 
-        let anim;
-        function draw() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          particles.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = p.opacity;
-            ctx.fill();
-            p.x += p.dx; p.y += p.dy;
-            if (p.y < -10) p.y = canvas.height + 10;
-            if (p.x < -10) p.x = canvas.width + 10;
-            if (p.x > canvas.width + 10) p.x = -10;
-          });
-          ctx.globalAlpha = 1;
-          anim = requestAnimationFrame(draw);
-        }
-        draw();
-        const handleResize = () => {
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
-        };
-        window.addEventListener('resize', handleResize);
-        return () => { cancelAnimationFrame(anim); window.removeEventListener('resize', handleResize); };
-      }, []);
-
-      return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" style={{ opacity: 0.6 }} />;
-    }
-
-    // ─── Orb ───────────────────────────────────────────────────────────────────
-    function Orb({ speaking }) {
-      return (
-        <div className="flex flex-col items-center gap-4">
-          <div
-            onClick={() => {}}
-            className={`rounded-full cursor-pointer transition-all duration-500 flex items-center justify-center
-              ${speaking ? 'orb-speak bg-orbSpeak' : 'orb-idle bg-orbIdle'}`}
-            style={{
-              width: 160, height: 160,
-              border: `3px solid ${speaking ? '#FFD700' : '#00F5F5'}`,
-            }}
-          >
-            <span className="font-orbitron text-void font-bold text-lg tracking-widest uppercase">
-              MAX
-            </span>
-          </div>
-          <span className={`font-orbitron text-sm tracking-widest uppercase transition-colors duration-500 ${speaking ? 'text-orbSpeak' : 'text-orbIdle'}`}>
-            {speaking ? 'Speaking' : 'Listening'}
-            <span className="ml-1 animate-[blink_1s_ease-in-out_infinite]">●</span>
-          </span>
+    <div class="sidebar-section">
+      <h3>Planning</h3>
+      <div class="plan-item">
+        <div class="plan-dot yellow"></div>
+        <div class="plan-content">
+          <div class="plan-time">Today · 18:00</div>
+          <div class="plan-title">Q2 Strategy Review</div>
         </div>
-      );
-    }
-
-    // ─── Glass Panel ───────────────────────────────────────────────────────────
-    function GlassPanel({ title, children, className = '' }) {
-      return (
-        <div className={`glass rounded-2xl p-4 panel-in ${className}`}>
-          {title && <h3 className="font-orbitron text-xs tracking-widest text-orbIdle uppercase mb-3">{title}</h3>}
-          {children}
+      </div>
+      <div class="plan-item">
+        <div class="plan-dot blue"></div>
+        <div class="plan-content">
+          <div class="plan-time">Tomorrow · 09:30</div>
+          <div class="plan-title">Team Standup</div>
         </div>
-      );
-    }
-
-    // ─── Task Item ─────────────────────────────────────────────────────────────
-    function TaskItem({ text, done, priority }) {
-      const colors = { high: 'bg-red-400', medium: 'bg-yellow-400', low: 'bg-green-400' };
-      return (
-        <div className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-          <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
-            ${done ? 'bg-orbIdle border-orbIdle' : 'border-white/20'}`}>
-            {done && <svg className="w-2.5 h-2.5 text-void" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>}
-          </div>
-          <span className={`text-sm flex-1 ${done ? 'line-through text-silver/50' : 'text-softWhite/80'}`}>{text}</span>
-          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${colors[priority] || colors.medium}`} />
+      </div>
+      <div class="plan-item">
+        <div class="plan-dot green"></div>
+        <div class="plan-content">
+          <div class="plan-time">Monday · 14:00</div>
+          <div class="plan-title">Max v1.3 Sprint Planning</div>
         </div>
-      );
-    }
-
-    // ─── Stat Bar ──────────────────────────────────────────────────────────────
-    function StatBar({ label, value, color = 'from-orbIdle to-purple-500' }) {
-      return (
-        <div className="mb-3">
-          <div className="flex justify-between text-xs mb-1">
-            <span className="text-silver">{label}</span>
-            <span className="text-softWhite font-medium">{value}%</span>
-          </div>
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full bg-gradient-to-r ${color} transition-all duration-1000`}
-              style={{ width: `${value}%` }}
-            />
-          </div>
+      </div>
+      <div class="plan-item">
+        <div class="plan-dot yellow"></div>
+        <div class="plan-content">
+          <div class="plan-time">Wednesday · 10:00</div>
+          <div class="plan-title">Client Presentation</div>
         </div>
-      );
-    }
-
-    // ─── Calendar Event ────────────────────────────────────────────────────────
-    function CalendarEvent({ time, title, type = 'default' }) {
-      const colors = {
-        default: 'border-l-orbIdle',
-        meeting: 'border-l-orbSpeak',
-        task: 'border-l-purple-400',
-      };
-      return (
-        <div className={`flex gap-3 py-2 border-b border-white/5 last:border-0 border-l-2 ${colors[type]} pl-2`}>
-          <span className="text-xs text-silver flex-shrink-0 w-12 pt-0.5">{time}</span>
-          <span className="text-sm text-softWhite/80">{title}</span>
+      </div>
+      <div class="plan-item">
+        <div class="plan-dot blue"></div>
+        <div class="plan-content">
+          <div class="plan-time">Friday · 16:00</div>
+          <div class="plan-title">Retrospective</div>
         </div>
-      );
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="orb-container">
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb"></div>
+      <div class="orb-label">MAX · ACTIVE</div>
+    </div>
+
+    <div class="status-row">
+      <div class="status-card">
+        <div class="num">5</div>
+        <div class="label">Tasks Today</div>
+      </div>
+      <div class="status-card">
+        <div class="num">2</div>
+        <div class="label">In Progress</div>
+      </div>
+      <div class="status-card">
+        <div class="num">87%</div>
+        <div class="label">Efficiency</div>
+      </div>
+      <div class="status-card">
+        <div class="num">4</div>
+        <div class="label">Meetings</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Chat Bar -->
+<div class="chat-bar">
+  <div class="orb-icon-sm"></div>
+  <input class="chat-input" id="chatInput" placeholder="Ask Max anything..." autocomplete="off">
+  <button class="chat-send" onclick="sendChat()">
+    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+  </button>
+</div>
+
+<script>
+  // ── Particles ──
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w, h, ps = [];
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.size = Math.random() * 2 + 0.5;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.opacity = Math.random() * 0.5 + 0.1;
+      this.hue = Math.random() > 0.5 ? 210 : 45; // blue or yellow
     }
-
-    // ─── Quick Action Button ────────────────────────────────────────────────────
-    function QuickAction({ icon, label, onClick }) {
-      return (
-        <button
-          onClick={onClick}
-          className="glass rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-orbIdle/40 transition-all duration-300 cursor-pointer group"
-        >
-          <span className="text-2xl group-hover:scale-110 transition-transform">{icon}</span>
-          <span className="text-xs text-silver font-medium">{label}</span>
-        </button>
-      );
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < 0 || this.x > w || this.y < 0 || this.y > h) this.reset();
     }
-
-    // ─── Chat Bar ───────────────────────────────────────────────────────────────
-    function ChatBar({ onSend }) {
-      const [val, setVal] = useState('');
-      const handleSend = () => {
-        if (!val.trim()) return;
-        onSend(val.trim());
-        setVal('');
-      };
-      return (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-20">
-          <div className="glass rounded-full flex items-center px-5 py-3 gap-3 shadow-2xl">
-            <input
-              value={val}
-              onChange={e => setVal(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSend()}
-              placeholder="Ask Max anything..."
-              className="flex-1 bg-transparent text-softWhite placeholder-silver/50 text-sm outline-none"
-            />
-            <button
-              onClick={handleSend}
-              className="w-8 h-8 rounded-full bg-orbIdle/20 flex items-center justify-center text-orbIdle hover:bg-orbIdle hover:text-void transition-all flex-shrink-0"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-            </button>
-          </div>
-        </div>
-      );
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${this.hue}, 80%, 65%, ${this.opacity})`;
+      ctx.fill();
     }
+  }
 
-    // ─── Left Sidebar ───────────────────────────────────────────────────────────
-    function LeftSidebar() {
-      const tasks = [
-        { text: 'Finalize Q2 strategy deck', done: true, priority: 'high' },
-        { text: 'Review API integration docs', done: false, priority: 'high' },
-        { text: 'Team standup at 10:00', done: false, priority: 'medium' },
-        { text: 'Update project timeline', done: false, priority: 'low' },
-        { text: 'Code review — auth module', done: false, priority: 'medium' },
-      ];
-      const planSteps = [
-        { label: 'Research', pct: 80 },
-        { label: 'Design', pct: 45 },
-        { label: 'Development', pct: 20 },
-        { label: 'Testing', pct: 0 },
-      ];
-      return (
-        <div className="w-64 flex-shrink-0 flex flex-col gap-4 overflow-y-auto scroll-glass px-2 py-4">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-xl bg-orbIdle/20 border border-orbIdle/40 flex items-center justify-center">
-              <span className="font-orbitron font-black text-orbIdle text-sm">M</span>
-            </div>
-            <div>
-              <div className="font-orbitron font-bold text-softWhite text-sm tracking-widest">MAX</div>
-              <div className="text-xs text-silver">AI Assistant</div>
-            </div>
-          </div>
+  for (let i = 0; i < 120; i++) ps.push(new Particle());
 
-          <GlassPanel title="Tasks">
-            {tasks.map((t, i) => <TaskItem key={i} {...t} />)}
-          </GlassPanel>
+  function animateParticles() {
+    ctx.clearRect(0, 0, w, h);
+    ps.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
 
-          <GlassPanel title="Current Plan">
-            <div className="space-y-3">
-              {planSteps.map((s, i) => (
-                <div key={i}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-silver">{s.label}</span>
-                    <span className="text-softWhite">{s.pct}%</span>
-                  </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-orbIdle to-purple-400 transition-all duration-1000"
-                      style={{ width: `${s.pct}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </GlassPanel>
-        </div>
-      );
-    }
+  // ── Clock ──
+  function updateClock() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${hh}:${mm}`;
+    const opts = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+    document.getElementById('date-str').textContent = now.toLocaleDateString('en-GB', opts);
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
 
-    // ─── Right Sidebar ──────────────────────────────────────────────────────────
-    function RightSidebar() {
-      const [cpu, setCpu] = useState(0);
-      const [mem, setMem] = useState(0);
-      const events = [
-        { time: '10:00', title: 'Team Standup', type: 'meeting' },
-        { time: '12:30', title: 'Lunch Break', type: 'default' },
-        { time: '14:00', title: 'Sprint Review', type: 'meeting' },
-        { time: '16:00', title: 'Max — daily brief', type: 'task' },
-        { time: '18:00', title: 'Gym session', type: 'default' },
-      ];
+  // ── Task Toggle ──
+  function toggleTask(el) { el.classList.toggle('done'); }
 
-      useEffect(() => {
-        const interval = setInterval(() => {
-          setCpu(Math.floor(Math.random() * 30 + 20));
-          setMem(Math.floor(Math.random() * 20 + 45));
-        }, 2000);
-        return () => clearInterval(interval);
-      }, []);
-
-      return (
-        <div className="w-72 flex-shrink-0 flex flex-col gap-4 overflow-y-auto scroll-glass px-2 py-4">
-          <GlassPanel title="Planning">
-            {events.map((e, i) => <CalendarEvent key={i} {...e} />)}
-          </GlassPanel>
-
-          <GlassPanel title="System">
-            <StatBar label="CPU Load" value={cpu} color="from-orbIdle to-green-400" />
-            <StatBar label="Memory" value={mem} color="from-purple-400 to-orbSpeak" />
-            <StatBar label="Network" value={62} color="from-orbSpeak to-red-400" />
-            <div className="flex justify-between items-center mt-2 pt-2 border-t border-white/5">
-              <span className="text-xs text-silver">Uptime</span>
-              <span className="text-xs font-orbitron text-orbIdle">99.9%</span>
-            </div>
-          </GlassPanel>
-
-          <GlassPanel title="Quick Stats">
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'Tasks Done', value: '12' },
-                { label: 'This Week', value: '48h' },
-                { label: 'Focus Score', value: '94' },
-                { label: 'Streak', value: '7d' },
-              ].map((s, i) => (
-                <div key={i} className="text-center">
-                  <div className="font-orbitron font-bold text-lg text-softWhite">{s.value}</div>
-                  <div className="text-xs text-silver">{s.label}</div>
-                </div>
-              ))}
-            </div>
-          </GlassPanel>
-        </div>
-      );
-    }
-
-    // ─── Center Content ──────────────────────────────────────────────────────────
-    function CenterContent({ speaking, onToggleSpeak }) {
-      const actions = [
-        { icon: '🌤️', label: 'Weather', onClick: () => {} },
-        { icon: '📰', label: 'News', onClick: () => {} },
-        { icon: '⏱️', label: 'Timer', onClick: () => {} },
-        { icon: '⚙️', label: 'Settings', onClick: () => {} },
-      ];
-      return (
-        <div className="flex-1 flex flex-col items-center justify-center gap-10 relative z-10">
-          {/* Orb */}
-          <Orb speaking={speaking} />
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-4 gap-4">
-            {actions.map((a, i) => <QuickAction key={i} {...a} />)}
-          </div>
-
-          {/* Orb state toggle hint */}
-          <button
-            onClick={onToggleSpeak}
-            className="text-xs text-silver/50 hover:text-silver transition-colors mt-2"
-          >
-            Click orb to toggle state
-          </button>
-        </div>
-      );
-    }
-
-    // ─── Chat Messages ──────────────────────────────────────────────────────────
-    function ChatMessages({ messages }) {
-      return (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-20 flex flex-col gap-2 pointer-events-none">
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.from === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-xs rounded-2xl px-4 py-2 text-sm ${
-                m.from === 'user'
-                  ? 'bg-orbIdle/20 border border-orbIdle/30 text-softWhite rounded-br-sm'
-                  : 'glass text-softWhite/80 rounded-bl-sm'
-              }`}>
-                {m.text}
-              </div>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    // ─── App ─────────────────────────────────────────────────────────────────────
-    function App() {
-      const [speaking, setSpeaking] = useState(false);
-      const [messages, setMessages] = useState([
-        { from: 'max', text: 'Hello! I am Max, your personal AI assistant. How can I help you today?' },
-      ]);
-
-      const handleSend = (text) => {
-        setMessages(prev => [...prev, { from: 'user', text }]);
-        setSpeaking(true);
-        setTimeout(() => {
-          setMessages(prev => [...prev, { from: 'max', text: `You said: "${text}". I'm processing that now...` }]);
-          setSpeaking(false);
-        }, 1500);
-      };
-
-      return (
-        <div className="w-full h-full flex relative">
-          <ParticleCanvas />
-
-          {/* Left */}
-          <LeftSidebar />
-
-          {/* Center */}
-          <CenterContent speaking={speaking} onToggleSpeak={() => setSpeaking(s => !s)} />
-
-          {/* Right */}
-          <RightSidebar />
-
-          {/* Chat */}
-          <ChatMessages messages={messages} />
-          <ChatBar onSend={handleSend} />
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+  // ── Chat ──
+  function sendChat() {
+    const input = document.getElementById('chatInput');
+    const val = input.value.trim();
+    if (!val) return;
+    // Placeholder response effect
+    const orig = input.placeholder;
+    input.value = '';
+    input.placeholder = 'Max is thinking...';
+    setTimeout(() => { input.placeholder = orig; }, 1800);
+  }
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChat();
+  });
+</script>
 </body>
 </html>
