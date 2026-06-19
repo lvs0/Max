@@ -1,92 +1,99 @@
-# Max Dashboard — Specification
+# Max Dashboard — Jarvis-like Interface
 
-## 1. Concept & Vision
+## Aesthetic Direction
+**Jarvis meets cosmic glass.** Dark, cinematic, intelligent. Every element floats in layered glass. A living, breathing orb pulses at the center like a synthetic heart. Particles drift like digital stardust. This is a command center for someone who wants to feel like they're running a starship from their browser.
 
-Max is a fully local, autonomous AI assistant with a glassmorphic JARVIS-like dashboard. Runs offline with Ollama, stores memory in SQLite, works entirely on your machine.
+## Design Language
 
-## 2. Technical Architecture
+### Color Palette
+- `--bg-deep`: #050510 (near-black cosmic blue)
+- `--bg-glass`: rgba(255,255,255,0.04) (frosted panel surfaces)
+- `--glass-border`: rgba(255,255,255,0.10)
+- `--orb-blue`: #3b82f6 → `--orb-yellow`: #eab308 (animated gradient)
+- `--text-primary`: rgba(255,255,255,0.95)
+- `--text-muted`: rgba(255,255,255,0.45)
+- `--accent-glow`: rgba(59,130,246,0.3)
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    MAX                             │
-├─────────────────────────────────────────────────────┤
-│  Frontend: index.html (single file)                    │
-│  - Glassmorphic UI                                │
-│  - Chat interface                                │
-│  - Tasks & System Stats                          │
-├─────────────────────────────────────────────────────┤
-│  Backend: FastAPI (Python)                        │
-│  - /chat        → Ollama inference               │
-│  - /tasks      → SQLite CRUD                   │
-│  - /stats     → psutil monitoring              │
-│  - /memory    → conversation history         │
-├─────────────────────────────────────────────────────┤
-│  Storage: SQLite (~/.max/memory.db)              │
-│  - conversations table                         │
-│  - tasks table                              │
-│  - system table                             │
-├─────────────────────────────────────────────────────┤
-│  AI: Ollama (qwen3:8b default)                 │
-│  - Fully local inference                       │
-│  - No cloud, no API keys                    │
-└─────────────────────────────────────────────────────┘
-```
+### Typography
+- **Display**: Orbitron (Google Fonts) — futuristic, authoritative
+- **Body**: DM Sans — clean, readable, modern
 
-## 3. UI/UX Specification
+### Motion
+- Orb: continuous hue-rotate blue→yellow (8s ease infinite), subtle scale pulse (3s)
+- Particles: canvas-driven, 60 particles drifting upward, fade out at top
+- Sidebar panels: slide-in on load (staggered 100ms), 400ms ease-out
+- Chat bar: elastic bounce-in on mount
+- Hover states: glass panels lift with box-shadow bloom
 
-**Colors:**
-- Background: `#050510`
-- Glass: `rgba(255,255,255,0.06)`
-- Orb Idle: `#00F5F5` (cyan)
-- Orb Speaking: `#FFD700` (gold)
+### Visual Assets
+- Lucide icons for sidebar nav
+- CSS-only particle canvas
+- Orb uses radial-gradient + backdrop-filter blur
 
-**Layout:** Three-column (sidebar 280px | main flex | sidebar 280px)
-
-**Fonts:**
-- Primary: Syne
-- Mono: Space Mono
-
-## 4. API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | / | Health check |
-| POST | /chat | Send message to AI |
-| GET | /tasks | List tasks |
-| POST | /tasks | Create task |
-| PUT | /tasks/{id} | Update task |
-| DELETE | /tasks/{id} | Delete task |
-| GET | /stats | System stats |
-| GET | /models | Available Ollama models |
-| GET | /memory | Conversation history |
-| DELETE | /memory | Clear history |
-
-## 5. Files
+## Layout
 
 ```
-Max/
-├── index.html       # Dashboard UI
-├── backend/
-│   └── main.py    # FastAPI backend
-├── requirements.txt
-├── install.sh
-├── README.md
-└── SPEC.md
+┌─────────────────────────────────────────┐
+│  SIDEBAR (240px)  │   MAIN CONTENT      │
+│  ─────────────    │   ─────────────     │
+│  [Logo: MAX]      │   ┌─────────────┐   │
+│                   │   │  ORB (center)│  │
+│  ▸ Dashboard      │   │  + particles │  │
+│  ▸ Tasks          │   │  + greeting  │  │
+│  ▸ Planning       │   └─────────────┘   │
+│  ▸ Projects       │                     │
+│  ▸ Settings       │   ┌─────────────┐   │
+│                   │   │  CHAT BAR   │   │
+│  ─────────────    │   └─────────────┘   │
+│  [User Avatar]    │                     │
+└─────────────────────────────────────────┘
 ```
 
-## 6. Installation
+- Sidebar: fixed left, glass panels stacked vertically, scrollable task list
+- Main: orb centered with particle canvas behind, chat bar anchored bottom
+- Responsive: sidebar collapses to icon-only on mobile
 
-```bash
-pip install -r requirements.txt
-ollama serve
-python backend/main.py
-# Open index.html
-```
+## Features
 
-## 7. Dependencies
+### Orb (Hero Element)
+- 200px diameter radial gradient sphere
+- Color animates blue→yellow via CSS hue-rotate
+- Pulsing scale animation (0.95→1.05)
+- Soft glow halo behind
 
-- fastapi>=0.100.0
-- uvicorn>=0.23.0
-- ollama>=0.1.0
-- psutil>=5.9.0
-- pydantic>=2.0.0
+### Particle System
+- Canvas element behind orb
+- 60 small circles (2-4px) in white/blue tones
+- Rise slowly, slight horizontal drift
+- Loop infinitely
+
+### Sidebar Tasks
+- Scrollable task list with checkboxes
+- Add task inline
+- Task completion toggles strikethrough + opacity fade
+- Color-coded priority dots
+
+### Sidebar Planning
+- Mini calendar showing current week
+- Today's date highlighted
+- Up to 3 upcoming events listed below
+
+### Chat Bar
+- Frosted glass input field
+- Send button with hover glow
+- Message history above (simulated)
+- Typing indicator animation
+
+## Technical Stack
+- Single HTML file (vanilla JS + CSS)
+- No build step required
+- Canvas API for particles
+- CSS custom properties for theming
+- Google Fonts via CDN
+
+## Polish
+- Custom scrollbar (thin, dark, matches theme)
+- ::selection color (accent blue)
+- Smooth scroll behavior
+- Glass panels: backdrop-filter: blur(20px)
+- Focus states: glowing ring in accent color
